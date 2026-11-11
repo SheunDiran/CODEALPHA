@@ -1,239 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { Sparkles, ArrowRight, Volume2, VolumeX, ShieldCheck, User } from 'lucide-react';
-import { ScreenId } from '../types/store';
+import { useEffect, useRef } from 'react';
+import type { ScreenId } from '../types/store';
 
-interface AppIntroSplashProps {
-  onEnter: (targetScreen?: ScreenId) => void;
-}
+const introDocument = "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Diran Wears · Lagos Atelier</title>\n<style>\n*{box-sizing:border-box}body{margin:0;background:#f8f1e4;color:#27291e;font:15px system-ui,sans-serif}main{min-height:100svh;display:grid;place-items:center;position:relative;isolation:isolate;overflow:hidden;padding:28px;background:radial-gradient(ellipse at 50% 45%,#fffaf0,#f4e9d5)}button{font:inherit;cursor:pointer;color:inherit}button:focus-visible{outline:2px solid #565e43;outline-offset:4px}.motif{position:absolute;width:36px;height:36px;fill:none;stroke:#666749;stroke-width:1.3;opacity:.33;z-index:-1;animation:float 5s ease-in-out infinite alternate;pointer-events:none}@keyframes float{to{transform:translateY(-12px) rotate(9deg)}}.stage{text-align:center;width:min(100%,670px)}.mark{width:104px;color:#51583e;transition:transform .55s,opacity .55s}.opening .mark{transform:scale(.68) translateY(-16px);opacity:.52}.opening .mark .w{transform:translate(8px,4px)}.w{transition:transform .55s}.wordmark{font:normal clamp(32px,8vw,84px)/1 Georgia,serif;letter-spacing:.04em;margin:22px 0;min-height:1em}.wordmark span{display:inline-block;opacity:0;transform:translateY(12px);transition:opacity .33s,transform .33s;transition-delay:calc(var(--n)*65ms)}.opening .wordmark span{opacity:1;transform:none}.eyebrow{font-size:11px;letter-spacing:.23em;text-transform:uppercase}.actions{display:flex;justify-content:center;flex-wrap:wrap;gap:10px}.actions button,.ticket button,.after button{padding:11px 16px;border:1px solid #6d7058;background:transparent}.actions button:first-child,.ticket button.primary{background:#353c2d;color:#fff8e8}.skip{position:absolute;top:18px;right:20px;background:none;border:0;text-decoration:underline}.ticket{display:flex;text-align:left;background:#fffaed;box-shadow:0 22px 70px #43372226;animation:rise .55s both;max-width:650px;margin:auto}.ticket article{padding:clamp(18px,5vw,46px);flex:1;min-width:0}.ticket h1{font:normal clamp(32px,7vw,62px)/1 Georgia,serif;margin:12px 0}.ticket p{line-height:1.55}.stub{display:grid;place-items:center;width:clamp(32px,10vw,72px);background:#e9ddc4;border-left:2px dashed #9e906e;writing-mode:vertical-rl;letter-spacing:.22em;transition:transform .32s,opacity .32s}.used .stub{transform:translate(45px,-12px) rotate(12deg);opacity:0}.ticket .choices{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.after{text-align:center}@keyframes rise{from{opacity:0;transform:translateY(35px) rotate(-3deg)}}@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}\n</style></head>\n<body><main><div id=\"motifs\" aria-hidden=\"true\"></div><section class=\"stage\" id=\"stage\"></section><button class=\"skip\" id=\"skip\">Skip intro</button></main>\n<script>\nconst stage=document.querySelector('#stage'),skip=document.querySelector('#skip');\nconst quiet=matchMedia('(prefers-reduced-motion: reduce)').matches;\nconst motifs=['M7 8l6-4 5 6 5-6 6 4 5 9-6 4-3-4v14H11V17l-3 4-6-4z','M10 4h16l3 28h-8l-3-16-3 16H7z','M5 6h13l14 14-12 12L5 17z M10 10a2 2 0 1 0 1 0','M5 26c5-10 8-1 15-7s9-4 12-10 M5 30c5-10 8-1 15-7s9-4 12-10'];\ndocument.querySelector('#motifs').innerHTML=[[9,15],[87,16],[16,77],[83,78],[5,48],[92,51],[33,9],[66,88]].map(([x,y],i)=>'<svg class=\"motif\" viewBox=\"0 0 36 36\" style=\"left:'+x+'%;top:'+y+'%;animation-delay:-'+i*.6+'s\"><path d=\"'+motifs[i%4]+'\"/></svg>').join('');\nlet context,sound=false,timers=[],phase='cover';\nfunction later(fn,ms){timers.push(setTimeout(fn,ms))}\nfunction stop(){timers.forEach(clearTimeout);timers=[];window.speechSynthesis?.cancel();if(context){context.close().catch(()=>{});context=null}}\nfunction speak(text){if(!sound||!window.speechSynthesis)return;const line=new SpeechSynthesisUtterance(text);line.lang='en-NG';line.rate=.9;speechSynthesis.speak(line)}\nfunction chime(){\n if(!context)return;\n const ctx=context,master=ctx.createGain();master.gain.value=.15;master.connect(ctx.destination);\n [659.25,987.77,1318.51].forEach((hz,i)=>{const start=ctx.currentTime+i*.12,osc=ctx.createOscillator(),gain=ctx.createGain();osc.type='sine';osc.frequency.value=hz;gain.gain.setValueAtTime(.001,start);gain.gain.exponentialRampToValueAtTime(.25,start+.05);gain.gain.exponentialRampToValueAtTime(.0001,start+2.2);osc.connect(gain);gain.connect(master);osc.start(start);osc.stop(start+2.5)});\n}\nfunction cover(){\n stop();phase='cover';skip.hidden=false;stage.classList.remove('opening');\n stage.innerHTML='<p class=\"eyebrow\">Lagos Atelier</p><svg class=\"mark\" viewBox=\"0 0 100 100\" aria-label=\"DW\" role=\"img\"><path d=\"M21 14h25c28 0 48 15 48 36S74 86 46 86H21z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3.5\"/><path class=\"w\" d=\"m35 39 8 22 10-17 10 17 8-22\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"/></svg><h1 class=\"wordmark\" aria-label=\"Diran Wears\">'+[...'DIRAN WEARS'].map((letter,i)=>letter===' '?' ':('<span aria-hidden=\"true\" style=\"--n:'+i+'\">'+letter+'</span>')).join('')+'</h1><div class=\"actions\"><button id=\"audible\">Enter with sound</button><button id=\"silent\">Continue silently</button></div>';\n document.querySelector('#audible').onclick=()=>start(true);document.querySelector('#silent').onclick=()=>start(false);\n}\nfunction start(enable){\n if(phase!=='cover')return;\n phase='opening';sound=enable;\n if(sound){try{const Audio=window.AudioContext||window.webkitAudioContext;context=new Audio();context.resume().catch(()=>{})}catch{}}\n stage.querySelector('.actions').remove();stage.classList.add('opening');speak('Welcome to Diran Wears.');\n later(()=>speak('Your Lagos Atelier pass is ready.'),quiet?500:1150);\n later(pass,quiet?800:2350);\n}\nfunction pass(){\n phase='pass';stage.classList.remove('opening');chime();\n stage.innerHTML='<div class=\"ticket\"><article><p class=\"eyebrow\">Diran Wears · Admit one</p><h1>Lagos Atelier</h1><p class=\"eyebrow\">Est. 2026</p><p>A contemporary Nigerian luxury house crafting unstructured tailoring, sculptural outerwear, and bespoke footwear.</p><div class=\"choices\"><button class=\"primary\" data-target=\"home\">Enter Storefront</button><button data-target=\"login\">Client Sign In</button><button data-target=\"look\">Shop the Look</button></div></article><div class=\"stub\" aria-hidden=\"true\">DW · A01</div></div>';\n stage.querySelectorAll('[data-target]').forEach(button=>button.onclick=()=>{if(phase!=='pass')return;phase='exit';stage.querySelector('.ticket').classList.add('used');later(()=>finish(button.dataset.target),quiet?0:330)});\n stage.querySelector('.primary').focus({preventScroll:true});\n}\nfunction finish(target){\n stop();\n if(parent!==window){parent.postMessage({type:'diran-intro-enter',target},'*');return}\n phase='done';skip.hidden=true;const names={home:'Storefront',login:'Client Sign In',look:'Shop the Look'};\n stage.innerHTML='<div class=\"after\"><p class=\"eyebrow\">Diran Wears</p><h1>'+names[target]+'</h1><p>Preview handoff to your existing app.</p><button id=\"replay\">Replay intro</button></div>';document.querySelector('#replay').onclick=cover;\n}\nskip.onclick=()=>finish('home');cover();\n</script></body></html>\n";
 
-export const AppIntroSplash: React.FC<AppIntroSplashProps> = ({ onEnter }) => {
-  const [phase, setPhase] = useState<'drawing' | 'letters' | 'subtitle' | 'ready'>('drawing');
-  const [soundEnabled, setSoundEnabled] = useState(true);
-
-  // Play luxury atelier chime using Web Audio API
-  const playLuxuryChime = () => {
-    try {
-      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioContext) return;
-      const ctx = new AudioContext();
-
-      // Master gain
-      const masterGain = ctx.createGain();
-      masterGain.gain.setValueAtTime(0.15, ctx.currentTime);
-      masterGain.connect(ctx.destination);
-
-      // Dual oscillator chord (E5 and B5 harmonic luxury chime)
-      const notes = [659.25, 987.77, 1318.51];
-      notes.forEach((freq, i) => {
-        const osc = ctx.createOscillator();
-        const noteGain = ctx.createGain();
-
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.12);
-
-        noteGain.gain.setValueAtTime(0.001, ctx.currentTime);
-        noteGain.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + i * 0.12 + 0.05);
-        noteGain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + i * 0.12 + 2.2);
-
-        osc.connect(noteGain);
-        noteGain.connect(masterGain);
-
-        osc.start(ctx.currentTime + i * 0.12);
-        osc.stop(ctx.currentTime + i * 0.12 + 2.5);
-      });
-    } catch (e) {
-      // Audio autoplay policy fallback
-    }
-  };
+export function AppIntroSplash({ onEnter }: { onEnter: (target: ScreenId) => void }) {
+  const frame = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
-    // Stage 1: Draw Monogram
-    const t1 = setTimeout(() => {
-      setPhase('letters');
-      if (soundEnabled) playLuxuryChime();
-    }, 900);
-
-    // Stage 2: Typography Reveal
-    const t2 = setTimeout(() => {
-      setPhase('subtitle');
-    }, 1800);
-
-    // Stage 3: Interactive Action Buttons Ready
-    const t3 = setTimeout(() => {
-      setPhase('ready');
-    }, 2400);
-
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
-    };
-  }, [soundEnabled]);
+    function handleMessage(event: MessageEvent) {
+      if (event.source !== frame.current?.contentWindow || event.origin !== 'null') return;
+      const { type, target } = event.data ?? {};
+      if (type === 'diran-intro-enter' && (target === 'home' || target === 'login' || target === 'look')) {
+        onEnter(target);
+      }
+    }
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [onEnter]);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col justify-between items-center bg-[#100F0E] text-[#FAF7F2] p-6 select-none overflow-hidden animate-in fade-in duration-500">
-      {/* Subtle architectural ambient backdrop */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#24261E]/40 via-[#100F0E] to-[#0A0909] pointer-events-none" />
-
-      {/* Top utility row: Sound toggle & Skip */}
-      <div className="relative z-10 w-full max-w-md flex items-center justify-between text-xs font-mono text-neutral-400 pt-2">
-        <button
-          onClick={() => {
-            const next = !soundEnabled;
-            setSoundEnabled(next);
-            if (next) playLuxuryChime();
-          }}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-white/5 hover:bg-white/10 text-neutral-300 transition-colors"
-        >
-          {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-[#9BAA7C]" /> : <VolumeX className="w-3.5 h-3.5 text-neutral-500" />}
-          <span className="text-[11px]">{soundEnabled ? 'Atelier Chime: ON' : 'Muted'}</span>
-        </button>
-
-        <button
-          onClick={() => onEnter('home')}
-          className="text-[11px] uppercase tracking-widest text-neutral-400 hover:text-white transition-colors"
-        >
-          Skip to Storefront &rarr;
-        </button>
-      </div>
-
-      {/* Central Animated Monogram & Wordmark Reveal */}
-      <div className="relative z-10 flex flex-col items-center justify-center my-auto space-y-6 text-center max-w-sm px-4">
-        {/* Animated Architectural Monogram */}
-        <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex items-center justify-center">
-          {/* Subtle glowing halo */}
-          <div className="absolute inset-0 rounded-full bg-[#4E563E]/20 blur-xl animate-pulse" />
-
-          {/* SVG Monogram with Animated Stroke Drawing */}
-          <svg
-            viewBox="0 0 100 100"
-            className="w-full h-full drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)]"
-          >
-            {/* Outer Geometric Ring */}
-            <circle
-              cx="50"
-              cy="50"
-              r="46"
-              fill="none"
-              stroke="#4E563E"
-              strokeWidth="1.5"
-              strokeDasharray="289"
-              className="transition-all duration-1000 ease-out"
-              style={{
-                strokeDashoffset: phase === 'drawing' ? '289' : '0',
-                opacity: 0.6
-              }}
-            />
-
-            {/* Letter D Contour */}
-            <path
-              d="M 28 26 L 28 74 L 48 74 C 64 74 72 62 72 50 C 72 38 64 26 48 26 Z"
-              fill="none"
-              stroke="#FAF7F2"
-              strokeWidth="4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeDasharray="200"
-              className="transition-all duration-1000 ease-out delay-150"
-              style={{
-                strokeDashoffset: phase === 'drawing' ? '200' : '0'
-              }}
-            />
-
-            {/* Intertwined Letter W in Muted Olive Gold */}
-            <path
-              d="M 44 42 L 50 68 L 58 48 L 66 68 L 72 42"
-              fill="none"
-              stroke="#9BAA7C"
-              strokeWidth="3.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeDasharray="150"
-              className="transition-all duration-1000 ease-out delay-300"
-              style={{
-                strokeDashoffset: phase === 'drawing' ? '150' : '0'
-              }}
-            />
-          </svg>
-        </div>
-
-        {/* Animated Brand Typography */}
-        <div className="space-y-3">
-          <div className="overflow-hidden">
-            <h1
-              className={`font-serif text-3xl sm:text-4xl text-white tracking-[0.25em] sm:tracking-[0.3em] uppercase transition-all duration-700 ease-out transform ${
-                phase === 'drawing'
-                  ? 'translate-y-8 opacity-0'
-                  : 'translate-y-0 opacity-100'
-              }`}
-            >
-              DIRAN WEARS
-            </h1>
-          </div>
-
-          <div className="overflow-hidden">
-            <div
-              className={`flex items-center justify-center gap-2 text-[11px] font-mono uppercase tracking-[0.3em] text-[#9BAA7C] transition-all duration-700 delay-200 ${
-                phase === 'drawing' || phase === 'letters'
-                  ? 'opacity-0 translate-y-4'
-                  : 'opacity-100 translate-y-0'
-              }`}
-            >
-              <span>Lagos Atelier</span>
-              <span>·</span>
-              <span>Est. 2026</span>
-            </div>
-          </div>
-
-          <p
-            className={`text-xs text-neutral-400 font-normal leading-relaxed max-w-xs transition-opacity duration-700 delay-300 ${
-              phase === 'ready' ? 'opacity-100' : 'opacity-0'
-            }`}
-          >
-            A contemporary Nigerian luxury house crafting unstructured tailoring, sculptural outerwear, and bespoke footwear.
-          </p>
-        </div>
-      </div>
-
-      {/* Action Gateway & App Entry Controls */}
-      <div
-        className={`relative z-10 w-full max-w-sm space-y-3 pb-4 transition-all duration-500 ${
-          phase === 'ready'
-            ? 'opacity-100 translate-y-0'
-            : 'opacity-0 translate-y-6 pointer-events-none'
-        }`}
-      >
-        <button
-          onClick={() => onEnter('home')}
-          className="w-full py-4 px-6 bg-[#FAF7F2] text-[#141312] hover:bg-white text-xs uppercase tracking-[0.2em] font-semibold transition-all flex items-center justify-between group shadow-xl"
-        >
-          <span>Enter Storefront</span>
-          <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1.5 transition-transform text-[#4E563E]" />
-        </button>
-
-        <div className="grid grid-cols-2 gap-2 text-xs">
-          <button
-            onClick={() => onEnter('login')}
-            className="py-3 px-3 bg-white/5 hover:bg-white/10 text-neutral-200 border border-white/10 text-[11px] uppercase tracking-wider font-medium flex items-center justify-center gap-1.5 transition-colors"
-          >
-            <User className="w-3.5 h-3.5 text-[#9BAA7C]" />
-            <span>Client Sign In</span>
-          </button>
-          <button
-            onClick={() => onEnter('look')}
-            className="py-3 px-3 bg-white/5 hover:bg-white/10 text-neutral-200 border border-white/10 text-[11px] uppercase tracking-wider font-medium flex items-center justify-center gap-1.5 transition-colors"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-[#9BAA7C]" />
-            <span>Shop the Look</span>
-          </button>
-        </div>
-
-        <div className="text-center pt-2">
-          <span className="text-[10px] font-mono text-neutral-500">
-            CodeAlpha Full Stack Internship · Task 1 Mobile-First PWA
-          </span>
-        </div>
-      </div>
-    </div>
+    <iframe ref={frame} title="Diran Wears opening and runway pass" srcDoc={introDocument}
+      sandbox="allow-scripts" allow="autoplay"
+      className="fixed inset-0 h-full w-full border-0 bg-[#f8f1e4]" />
   );
-};
+}
