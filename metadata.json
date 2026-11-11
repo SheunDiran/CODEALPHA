@@ -1,0 +1,6 @@
+{
+  "name": "Diran Wears",
+  "description": "Editorial fashion store with interactive mobile & desktop wireframe, Shop the Look signature bundle, checkout recovery states, route map, data model, and API specs.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
