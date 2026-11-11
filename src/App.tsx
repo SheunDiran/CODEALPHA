@@ -39,11 +39,8 @@ export default function App() {
 
   // Intro Animated Splash screen state
   const [showIntroSplash, setShowIntroSplash] = useState(() => {
-    try {
-      return sessionStorage.getItem('diran-intro-seen') !== 'yes';
-    } catch {
-      return true;
-    }
+    try { return sessionStorage.getItem('diran-intro-seen') !== 'yes'; }
+    catch { return true; }
   });
 
   // Inspector & Simulation controls
@@ -239,7 +236,7 @@ export default function App() {
   };
 
   const handleEnterFromIntro = (targetScreen: ScreenId = 'home') => {
-    try { sessionStorage.setItem('diran-intro-seen', 'yes'); } catch { /* Storage is optional. */ }
+    try { sessionStorage.setItem('diran-intro-seen', 'yes'); } catch { /* Optional storage. */ }
     setShowIntroSplash(false);
     setCurrentScreen(targetScreen);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -418,6 +415,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#EFECE6] dark:bg-[#0B0A0A] text-[#181716] dark:text-[#E8E4DA] flex flex-col w-full overflow-x-hidden">
+
       {/* 1. REVIEW & PROTOTYPE INSPECTION TOOLBAR */}
       <ReviewToolbar
         currentScreen={currentScreen}
