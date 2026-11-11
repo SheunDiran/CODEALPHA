@@ -38,7 +38,13 @@ export default function App() {
   const [isFromCheckout, setIsFromCheckout] = useState(false);
 
   // Intro Animated Splash screen state
-  const [showIntroSplash, setShowIntroSplash] = useState(false);
+  const [showIntroSplash, setShowIntroSplash] = useState(() => {
+    try {
+      return sessionStorage.getItem('diran-intro-seen') !== 'yes';
+    } catch {
+      return true;
+    }
+  });
 
   // Inspector & Simulation controls
   const [viewportMode, setViewportMode] = useState<ViewportMode>('desktop');
@@ -233,6 +239,7 @@ export default function App() {
   };
 
   const handleEnterFromIntro = (targetScreen: ScreenId = 'home') => {
+    try { sessionStorage.setItem('diran-intro-seen', 'yes'); } catch { /* Storage is optional. */ }
     setShowIntroSplash(false);
     setCurrentScreen(targetScreen);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -407,13 +414,10 @@ export default function App() {
     }
   };
 
+  if (showIntroSplash) return <AppIntroSplash onEnter={handleEnterFromIntro} />;
+
   return (
     <div className="min-h-screen bg-[#EFECE6] dark:bg-[#0B0A0A] text-[#181716] dark:text-[#E8E4DA] flex flex-col w-full overflow-x-hidden">
-      {/* Animated Brand Intro Splash Screen (Playable anytime or on demand) */}
-      {showIntroSplash && (
-        <AppIntroSplash onEnter={handleEnterFromIntro} />
-      )}
-
       {/* 1. REVIEW & PROTOTYPE INSPECTION TOOLBAR */}
       <ReviewToolbar
         currentScreen={currentScreen}
